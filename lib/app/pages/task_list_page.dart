@@ -10,7 +10,7 @@ class TaskListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task List (BLoC)'),
+        title: const Text('List Of Tasks'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: BlocBuilder<TaskBloc, TaskState>(
@@ -23,7 +23,7 @@ class TaskListPage extends StatelessWidget {
           }
           if (state is TaskLoadSuccess) {
             if (state.tasks.isEmpty) {
-              return const Center(child: Text('No tasks yet! Add one.'));
+              return const Center(child: Text('No tasks.'));
             }
             return ListView.builder(
               itemCount: state.tasks.length,
@@ -51,11 +51,10 @@ class TaskListPage extends StatelessWidget {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Add a new task'),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(hintText: 'Enter task title'),
+            decoration: const InputDecoration(hintText: "What's your task?"),
           ),
           actions: [
             TextButton(
