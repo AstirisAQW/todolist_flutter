@@ -1,6 +1,5 @@
 import '../../domain/entities/task.dart';
 
-// In a real app, this would be a database (SQLite, Hive) or an API client.
 abstract class TaskLocalDataSource {
   Future<List<Task>> getTask();
   Future<void> addTask(Task task);
