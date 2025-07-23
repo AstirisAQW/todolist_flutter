@@ -8,32 +8,42 @@ import 'package:todolist_flutter/domain/usecases/get_todos.dart';
 import 'package:todolist_flutter/domain/usecases/update_todo.dart';
 import 'package:todolist_flutter/presentation/bloc/todo_bloc.dart';
 
-final sl = GetIt.instance;
+// serviceLocator is a common abbreviation for Service Locator.
+final serviceLocator = GetIt.instance;
 
+/// Initializes and registers all the dependencies for the application.
+/// This function is called once at startup in main.dart.
 Future<void> init() async {
-  // BLoC
-  sl.registerFactory(
+  // --- Presentation Layer ---
+  // BLoCs are typically registered as 'factory' because we might want a new
+  // instance for a feature that has its own BLoC.
+  serviceLocator.registerFactory(
     () => TodoBloc(
-      getTodos: sl(),
-      addTodo: sl(),
-      updateTodo: sl(),
-      deleteTodo: sl(),
+      getTodos: serviceLocator(),
+      addTodo: serviceLocator(),
+      updateTodo: serviceLocator(),
+      deleteTodo: serviceLocator(),
     ),
   );
 
-  // Use Cases
-  sl.registerLazySingleton(() => GetTodos(sl()));
-  sl.registerLazySingleton(() => AddTodo(sl()));
-  sl.registerLazySingleton(() => UpdateTodo(sl()));
-  sl.registerLazySingleton(() => DeleteTodo(sl()));
+  // --- Domain Layer (Use Cases) ---
+  // Use cases are registered as 'lazySingleton' because they are simple,
+  // stateless classes that can be shared across the app.
+  serviceLocator.registerLazySingleton(() => GetTodos(serviceLocator()));
+  serviceLocator.registerLazySingleton(() => AddTodo(serviceLocator()));
+  serviceLocator.registerLazySingleton(() => UpdateTodo(serviceLocator()));
+  serviceLocator.registerLazySingleton(() => DeleteTodo(serviceLocator()));
 
-  // Repository
-  sl.registerLazySingleton<TodoRepository>(
-    () => TodoRepositoryImpl(remoteDataSource: sl()),
+  // --- Data Layer (Repositories and Data Sources) ---
+  // Register the repository implementation against its abstract class.
+  // This allows us to depend on the abstract TodoRepository in our use cases,
+  // making them independent of the data source implementation.
+  serviceLocator.registerLazySingleton<TodoRepository>(
+    () => TodoRepositoryImpl(remoteDataSource: serviceLocator()),
   );
 
-  // Data Sources
-  sl.registerLazySingleton<TodoRemoteDataSource>(
+  // Register the data source.
+  serviceLocator.registerLazySingleton<TodoRemoteDataSource>(
     () => TodoRemoteDataSourceImpl(),
   );
 }

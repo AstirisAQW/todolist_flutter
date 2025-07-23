@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todolist_flutter/domain/entities/todo.dart';
 import 'package:todolist_flutter/presentation/bloc/todo_bloc.dart';
 
+/// The main UI screen of the application.
+/// It's a StatelessWidget because all state is managed by the TodoBloc.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -12,16 +14,21 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(title: const Text("Clean To-Do List")),
       body: BlocBuilder<TodoBloc, TodoState>(
         builder: (context, state) {
+          // Handle the loading state
           if (state is TodoLoadInProgress || state is TodoInitial) {
             return const Center(child: CircularProgressIndicator());
           }
+          // Handle the error state
           if (state is TodoOperationFailure) {
             return Center(child: Text('Error: ${state.error}'));
           }
+          // Handle the success state
           if (state is TodoLoadSuccess) {
             final todos = state.todos;
             if (todos.isEmpty) {
-              return const Center(child: Text("No todos"));
+              return const Center(
+                child: Text("No todos yet. Add one!")
+              );
             }
             return ListView.builder(
               itemCount: todos.length,
@@ -32,12 +39,15 @@ class HomePage extends StatelessWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Edit button
                       IconButton(
                         onPressed: () => _openTodoDialog(context, todo: todo),
                         icon: const Icon(Icons.edit),
                       ),
+                      // Delete button
                       IconButton(
                         onPressed: () {
+                          // Dispatch a delete event to the BLoC
                           context
                               .read<TodoBloc>()
                               .add(DeleteTodoRequested(todo.id!));
@@ -50,6 +60,7 @@ class HomePage extends StatelessWidget {
               },
             );
           }
+          // Fallback for any other unhandled state
           return const Center(child: Text("Something went wrong."));
         },
       ),
@@ -60,6 +71,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  /// A helper method to show the Add/Edit To-Do dialog.
+  /// If a [todo] is provided, it populates the dialog for editing.
   void _openTodoDialog(BuildContext context, {Todo? todo}) {
     final textController = TextEditingController(text: todo?.task);
     final isEditing = todo != null;
@@ -87,12 +100,14 @@ class HomePage extends StatelessWidget {
                   final updatedTodo = Todo(
                     id: todo.id,
                     task: task,
-                    timestamp: todo.timestamp, // Keep original creation timestamp
+                    timestamp: todo.timestamp,
                   );
+                  // Dispatch an update event to the BLoC
                   context
                       .read<TodoBloc>()
                       .add(UpdateTodoRequested(updatedTodo));
                 } else {
+                  // Dispatch an add event to the BLoC
                   context.read<TodoBloc>().add(AddTodoRequested(task));
                 }
                 Navigator.pop(dialogContext);

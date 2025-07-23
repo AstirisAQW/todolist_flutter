@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 class Todo extends Equatable {
-  final String? id;
+  final String? id; // Can be Null for new todos that don't have an ID yet.
   final String task;
   final DateTime timestamp;
 
